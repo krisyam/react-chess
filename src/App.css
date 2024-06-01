@@ -1,20 +1,4 @@
-#root {
-  flex: 1;
-}
-
 .App {
-  display: flex;
-  flex: 1;
-  height: 100vh;
-  flex-direction: row;
-  background-color: #282c34;
-  overflow: hidden;
-}
-
-.content {
-  flex: 1;
-  justify-content: center;
-  align-content: center;
   text-align: center;
 }
 
