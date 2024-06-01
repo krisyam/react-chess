@@ -14,6 +14,7 @@ function Chess() {
         2: ['pawn-w', 'pawn-w', 'pawn-w', 'pawn-w', 'pawn-w', 'pawn-w', 'pawn-w', 'pawn-w'],
         1: ['rook-w', 'knight-w', 'bishop-w', 'queen-w', 'king-w', 'bishop-w', 'knight-w', 'rook-w']
     })
+    const [history, setHistory] = useState([])
     const handleSelection= (char, rowNum, index) => {
         if(selectedPiece!=='' && selectedPiece !== `${rowNum}${char}`) {
             handleMovePiece(`${rowNum}${char}`)
@@ -26,6 +27,7 @@ function Chess() {
     }
     const handleMovePiece = (to) => {
         const arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const notation = ['K', 'Q', 'R', 'B', 'N']
         const col = arr.indexOf(selectedPiece[1]);
         const toCol = arr.indexOf(to[1]);
         const chessboard = location
@@ -33,11 +35,13 @@ function Chess() {
         const pieceName = chessboard[selectedPiece[0]][col];
         chessboard[selectedPiece[0]][col] = 'none';
         chessboard[to[0]][toCol] = pieceName;
-        
-        console.log('chessboard', chessboard)
+
         setLocation(chessboard)
         setSelectedPiece('');
         setPlayer(player === 'w' ? 'b' : 'w');
+        // const isCheck = pieceName.split('-')[0] === 'pawn' ? '+' : '';
+        const historyMove = `${pieceName.split('-')[0] === 'pawn' ? '' : pieceName[0].toUpperCase()}${to[1]}${to[0]}`;
+        setHistory([...history, historyMove])
     }
 return (
     <div className='container'>
@@ -103,7 +107,20 @@ return (
             />
         </div>
         <div className='right-container'>
-            <div className='right'></div>
+            <div className='right'>
+                <grid className='history-container'>
+                    {history.map((move, index) => {
+                        console.log('move', move)
+                        if(index % 2 == 0) 
+                            return <div className='history' key={index}>
+                                {index / 2 + 1}. {move}
+                            </div>
+                        else return <div className='history' key={index}>
+                            {move}
+                        </div>
+                    })}
+                </grid>
+            </div>
         </div>
     </div>
 );
@@ -131,9 +148,12 @@ function Row({rowNum,
                     >
                         <img 
                             className='piece'
-                            style={{cursor: location[index] === 'none' ? 'initial' : 'grab'}}
+                            style={{
+                                cursor: location[index] === 'none' ? 'initial' : 'grab',
+                                backgroundColor: selectedPiece === `${rowNum}${char}` ? 'antiquewhite' : 'transparent'
+                            }}
                             draggable="false" 
-                            src={require(`../images/${location[index]}${selectedPiece === rowNum+char ? '-selected' : ''}.png`)}
+                            src={require(`../images/${location[index]}.png`)}   //${selectedPiece === rowNum+char ? '-selected' : ''}.png
                             alt={char+rowNum} 
                         />
                         {/* <img
