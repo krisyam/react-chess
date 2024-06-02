@@ -55,18 +55,18 @@ function Chess() {
                     // if pawn isnt in the 2nd or 7th row, it can only move 1 square
                     if (isWhite){
                         if(rowNum === 2) {
-                            moves = [checkPawnMove(rowNum+1, index, selected), checkPawnMove(rowNum+2, index, selected)]
+                            moves = [checkPawnMove(rowNum+1, index, selected, location, player), checkPawnMove(rowNum+2, index, selected, location, player)]
                         }
-                        else moves = [checkPawnMove(rowNum+1, index, selected)]
+                        else moves = [checkPawnMove(rowNum+1, index, selected, location, player)]
                         // pawns can move diagonally to capture
-                        moves = [...moves, checkPawnMove(rowNum+1, index+1, selected), checkPawnMove(rowNum+1, index-1, selected)]
+                        moves = [...moves, checkPawnMove(rowNum+1, index+1, selected, location, player), checkPawnMove(rowNum+1, index-1, selected, location, player)]
                     } else {
                         if(rowNum === 7) {
-                            moves = [checkPawnMove(rowNum-1, index, selected), checkPawnMove(rowNum-2, index, selected)]
+                            moves = [checkPawnMove(rowNum-1, index, selected, location, player), checkPawnMove(rowNum-2, index, selected, location, player)]
                         }
-                        else moves = [checkPawnMove(rowNum-1, index, selected)]
+                        else moves = [checkPawnMove(rowNum-1, index, selected, location, player)]
                         // pawns can move diagonally to capture
-                        moves = [...moves, checkPawnMove(rowNum-1, index+1, selected), checkPawnMove(rowNum-1, index-1, selected)]
+                        moves = [...moves, checkPawnMove(rowNum-1, index+1, selected, location, player), checkPawnMove(rowNum-1, index-1, selected, location, player)]
                     }
                     setPossibleMoves(moves)
                     return;
@@ -75,7 +75,7 @@ function Chess() {
                     // rooks can move horizontally and vertically
                     // rooks can move any number of squares
                     // should not be able to move through other pieces
-        
+                    setPossibleMoves(checkRookMove(selected, location, player))
                     return;
                 }
                 case 'bishop': { // bishop movement
@@ -88,6 +88,8 @@ function Chess() {
                     // queens can move horizontally, vertically, and diagonally
                     // queens can move any number of squares
                     // should not be able to move through other pieces
+                    moves = checkRookMove(selected, location, player)
+                    setPossibleMoves(moves)
                     return;
                 }
                 case 'king': { // king movement
@@ -104,25 +106,6 @@ function Chess() {
                 }
             }
         }
-    }
-    const checkPawnMove = (row, col, selected) => {
-        const arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        // check if its our own piece
-        // check if its an enemy piece
-        // check if empty square
-        if (col >= 0 && col <= 7 && row >= 1 && row <= 8){
-            console.log('location', location[selected[0]])
-            if (location[row][col] === 'none') {  // if empty square or enemy piece
-                if (arr.indexOf(selected[1])===col) return `${row+arr[col]}`; 
-                return null;
-                
-            }
-            else if (location[row][col].split('-')[1] !== player) { 
-                if (arr.indexOf(selected[1])===col) return null;
-                return `${row+arr[col]}`;
-            };
-        }
-        return null ;
     }
     const handleMovePiece = (to) => {
         const arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -223,7 +206,6 @@ return (
             <div className='right'>
                 <grid className='history-container'>
                     {history.map((move, index) => {
-                        console.log('move', move)
                         if(index % 2 === 0) 
                             return <div className='history' key={index}>
                                 {index / 2 + 1}. {move}
@@ -261,9 +243,9 @@ function ChessRow({rowNum,
                         key={char+rowNum}
                         onClick={()=>handleSelection(char,rowNum, index)}
                     >
-                        <p className='numbering label'>{char === 'a' ? rowNum : ''}</p>
-                        <p className='lettering label'>{rowNum === 1 ? char : ''}</p>
-                        <img 
+                        {char === 'a' ? <p className='numbering label'>{rowNum}</p> : ''}
+                        {rowNum === 1 ? <p className='lettering label'>{char}</p> : ''}
+                        <img
                             className='piece'
                             style={{cursor: location[index] === 'none' ? 'initial' : 'grab'}}
                             draggable="false" 
@@ -287,4 +269,87 @@ function ChessRow({rowNum,
             </div>
         </>
     )
+}
+
+const checkPawnMove = (row, col, selected, location, player) => {
+    const arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    // check if its our own piece
+    // check if its an enemy piece
+    // check if empty square
+    if (col >= 0 && col <= 7 && row >= 1 && row <= 8){
+        if (location[row][col] === 'none') {  // if empty square or enemy piece
+            if (arr.indexOf(selected[1])===col) return `${row+arr[col]}`; 
+            return null;
+        }
+        else if (location[row][col].split('-')[1] !== player) { 
+            if (arr.indexOf(selected[1])===col) return null;
+            return `${row+arr[col]}`;
+        };
+    }
+    return null ;
+}
+const checkRookMove = (selected, location, player) => {
+    const arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    let moves = [];
+    let bottom = 0, top = 9, left = -1, right = 8;
+    const xpos = selected[0], ypos = Number(arr.indexOf(selected[1]))
+    for (let x = Number(ypos)-1; left === -1 && x > -1; x--){ // left side of the piece
+        console.log('leftx', x)
+        if (location[xpos][x] === 'none') continue;
+        else if (location[xpos][x].split('-')[1] !== player) { // if enemy found
+            left = x;
+            break;
+        }
+        else if (location[xpos][x].split('-')[1] === player){    // if friendly
+            left = x+1;
+            break;
+        }
+    }
+    for (let x = Number(ypos)+1; right === 8 && x < 8; x++){ // right side of the piece
+        console.log('rightx', x)
+        if (location[xpos][x] === 'none') continue;
+        else if (location[xpos][x].split('-')[1] !== player) {    // if enemy found
+            right = x+1;
+            break;
+        }
+        else if (location[xpos][x].split('-')[1] === player){    // if friendly
+            right = x;
+            break;
+        }
+    }
+    for (let y = Number(xpos)-1; bottom === 0 && y > 0; y--){ // bottom side of the piece
+        console.log('bottomy', y)
+        if (location[y][ypos] === 'none') continue;
+        else if (location[y][ypos].split('-')[1] !== player) { // if enemy found
+            bottom = y;
+            break;
+        }
+        else if (location[y][ypos].split('-')[1] === player) {  // if friendly
+            bottom = y+1;
+            break;
+        }
+    }
+    console.log(xpos+1)
+    for (let y = Number(xpos)+1; top === 9 && y < 9; y++){ // top side of the piece
+        console.log('topy', y)
+        if (location[y][ypos] === 'none') continue;
+        else if (location[y][ypos].split('-')[1] !== player) {    // if enemy found
+            top = y+1;
+            break;
+        }
+        else if (location[y][ypos].split('-')[1] === player){   // if friendly
+            top = y;
+            break;
+        }
+    }
+    console.log('bottom top left right', bottom, top, left, right)
+    for (let x = left === -1 ? 0 : left; x < right; x++){
+        moves.push(`${xpos+arr[x]}`)
+    }
+    for (let y = bottom === 0 ? 1 : bottom; y < top; y++){
+        moves.push(`${y}${arr[ypos]}`)
+    }
+    moves = moves.filter(item => item !== selected)
+    // console.log('moves', xpos+arr[ypos], moves)
+    return moves;
 }
