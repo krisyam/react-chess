@@ -23,6 +23,7 @@
 
 .square {
     display: flex;
+    position: relative;
     flex-wrap: wrap;
     width: 60px;
     height: 60px;
@@ -37,9 +38,25 @@
     width: 50px;
     height: 50px;
     cursor: grab;
+    z-index: 50;
     /* pointer-events: none; */
 }
-
+.numbering {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+}
+.lettering {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+}
+.label {
+    font-size: 16px;
+    font-weight: 800;
+    color: rgba(0, 0, 0, 0.5);
+    margin: 0;
+}
 .right-container{
     height: 480px;
     width: 200px;

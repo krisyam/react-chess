@@ -261,6 +261,8 @@ function ChessRow({rowNum,
                         key={char+rowNum}
                         onClick={()=>handleSelection(char,rowNum, index)}
                     >
+                        <p className='numbering label'>{char === 'a' ? rowNum : ''}</p>
+                        <p className='lettering label'>{rowNum === 1 ? char : ''}</p>
                         <img 
                             className='piece'
                             style={{cursor: location[index] === 'none' ? 'initial' : 'grab'}}
